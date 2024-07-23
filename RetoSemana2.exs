@@ -1,5 +1,3 @@
-# Ejercicio 4ta sesión - Reto Semana 2 -  Andrés Guillermo Bonilla Olarte
-
 defmodule Library do
   defmodule Book do
     defstruct title: "", author: "", isbn: "", available: true
@@ -79,4 +77,91 @@ defmodule Library do
     user = Enum.find(users, &(&1.id == user_id))
     if user, do: user.borrowed_books, else: []
   end
+
+  def main do
+    library = []
+    users = []
+
+    loop(library, users)
+  end
+
+  defp loop(library, users) do
+    IO.puts """
+    Elija una opción:
+    1. Agregar libro
+    2. Agregar usuario
+    3. Prestar libro
+    4. Devolver libro
+    5. Listar libros
+    6. Listar usuarios
+    7. Listar libros prestados a un usuario
+    8. Salir
+    """
+
+    option = IO.gets("Opción: ") |> String.trim() |> String.to_integer()
+
+    {library, users} = case option do
+      1 ->
+        title = IO.gets("Título del libro: ") |> String.trim()
+        author = IO.gets("Autor del libro: ") |> String.trim()
+        isbn = IO.gets("ISBN del libro: ") |> String.trim()
+        book = %Book{title: title, author: author, isbn: isbn}
+        {add_book(library, book), users}
+
+      2 ->
+        name = IO.gets("Nombre del usuario: ") |> String.trim()
+        id = IO.gets("ID del usuario: ") |> String.trim()
+        user = %User{name: name, id: id}
+        {library, add_user(users, user)}
+
+      3 ->
+        user_id = IO.gets("ID del usuario: ") |> String.trim()
+        isbn = IO.gets("ISBN del libro a prestar: ") |> String.trim()
+        case borrow_book(library, users, user_id, isbn) do
+          {:ok, new_library, new_users} ->
+            IO.puts("Libro prestado exitosamente.")
+            {new_library, new_users}
+          {:error, reason} ->
+            IO.puts("Error: #{reason}")
+            {library, users}
+        end
+
+      4 ->
+        user_id = IO.gets("ID del usuario: ") |> String.trim()
+        isbn = IO.gets("ISBN del libro a devolver: ") |> String.trim()
+        case return_book(library, users, user_id, isbn) do
+          {:ok, new_library, new_users} ->
+            IO.puts("Libro devuelto exitosamente.")
+            {new_library, new_users}
+          {:error, reason} ->
+            IO.puts("Error: #{reason}")
+            {library, users}
+        end
+
+      5 ->
+        IO.inspect(list_books(library))
+        {library, users}
+
+      6 ->
+        IO.inspect(list_users(users))
+        {library, users}
+
+      7 ->
+        user_id = IO.gets("ID del usuario: ") |> String.trim()
+        IO.inspect(books_borrowed_by_user(users, user_id))
+        {library, users}
+
+      8 ->
+        IO.puts("Saliendo...")
+        :init.stop()
+
+      _ ->
+        IO.puts("Opción no válida.")
+        {library, users}
+    end
+
+    loop(library, users)
+  end
 end
+
+Library.main()
