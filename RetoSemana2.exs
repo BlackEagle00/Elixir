@@ -1,3 +1,5 @@
+# Ejercicio 4ta sesión - Reto Semana 2 -  Andrés Guillermo Bonilla Olarte
+
 defmodule Library do
   defmodule Book do
     defstruct title: "", author: "", isbn: "", available: true
